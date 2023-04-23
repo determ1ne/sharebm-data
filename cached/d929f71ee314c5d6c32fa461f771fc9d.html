@@ -1,0 +1,630 @@
+<!DOCTYPE html> <html style lang=en><!--
+ Page saved with SingleFile 
+ url: https://tls13.xargs.org/ 
+ saved date: Sun Apr 23 2023 20:53:02 GMT+0800 (China Standard Time)
+--><meta charset=utf-8>
+<title>The Illustrated TLS 1.3 Connection: Every Byte Explained</title>
+<meta name=viewport content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name=format-detection content="telephone=no">
+<meta name=title content="The Illustrated TLS 1.3 Connection">
+<meta name=description content="Every byte of a TLS 1.3 connection explained and reproduced">
+<style>*,*::before,*::after{box-sizing:border-box}html{line-height:1.15;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-ms-overflow-style:scrollbar;-webkit-tap-highlight-color:rgba(0,0,0,0)}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;text-align:left;background-color:#fff}p{margin-top:0;margin-bottom:1rem}a{color:#007bff;text-decoration:none;background-color:transparent;-webkit-text-decoration-skip:objects}a:hover{color:#0056b3;text-decoration:underline}pre,code,kbd,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em}h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6{margin-top:0;margin-bottom:0.5rem;font-weight:500;line-height:1.2}h1,.h1{font-size:2.5rem}h2,.h2{font-size:2rem}h3,.h3{font-size:1.75rem}h4,.h4{font-size:1.5rem}h5,.h5{font-size:1.25rem}h6,.h6{font-size:1rem}pre{display:block;font-size:87.5%;color:#212529}.container{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:400px){.container{padding-left:5px;padding-right:5px}}@media (min-width:768px){.container{max-width:720px}}@media (min-width:992px){.container{max-width:960px}}@media (min-width:1200px){.container{max-width:1140px}}:root{--chunky-text:#777;--server-bg:hsl(190,60%,80%);--client-bg:hsl(142,61%,82%);--server-bg-hover:hsl(288,28%,83%);--client-bg-hover:hsl(288,31%,80%);--sam-btn0:hsl(190,30%,45%);--sam-btn9:hsl(190,25%,40%);--sam-hov-btn0:hsl(190,30%,40%);--sam-hov-btn9:hsl(190,25%,35%);--sam-btn-shadow:hsl(180,41%,28%);--sam-btn-inset:hsl(180,45%,40%);--sam-btn-border:hsl(161,10%,37%);--act-btn0:hsl(37,96%,54%);--act-btn9:hsl(25,91%,54%);--act-hov-btn0:hsl(32,94%,52%);--act-hov-btn9:hsl(21,88%,51%);--act-btn-shadow:hsl(25,91%,40%);--act-btn-border:hsl(33,90%,45%)}body:not(.user-is-tabbing) button:focus,body:not(.user-is-tabbing) input:focus,body:not(.user-is-tabbing) select:focus,body:not(.user-is-tabbing) textarea:focus{outline:none}body{position:relative}.container{overflow:auto}@media (max-width:600px){.illustration{display:none!important}.print-mode{display:none}}h1:after{content:" ❧"}h1:before{content:"❧ "}h1,h3,h5{text-align:center;padding:10px;max-width:800px;margin:0 auto}h5{font-style:italic;font-family:serif}pre{margin:1em 0;overflow:scroll;-ms-overflow-style:scrollbar}pre code{font-size:inherit;word-break:normal;display:block;color:white;background-color:black;padding:0.5em;border-radius:5px;overflow:scroll;-ms-overflow-style:scrollbar}ol,ul,dl{margin:1rem 0}tt.longboi{word-break:break-all}.ind1{padding-left:1em}.ind2{padding-left:2em}.outerblock{max-width:600px;margin:1em auto}.outerblock p{text-align:center}.server{background-color:var(--server-bg)}.client{background-color:var(--client-bg)}.rec-outer{max-width:800px;margin:0.8em auto}.record,.calculation{cursor:pointer;max-width:800px;padding:1em;border-radius:1em;border:2px solid transparent}.record.embedded{margin-left:2em}.embed-arrow{position:absolute;font-size:2em;color:var(--chunky-text)}.illustrated .server.record .rec-label:before{content:"❰ ";color:var(--chunky-text)}.illustrated .client.record .rec-label:before{content:"❱ ";color:var(--chunky-text)}.illustrated .server.record.embedded .rec-label:before,.illustrated .client.record.embedded .rec-label:before{content:""}.illustrated .calculation .rec-label:before{content:"± ";font-weight:bold;color:var(--chunky-text)}.rec-label{cursor:pointer;font-size:1.3em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;white-space:nowrap;text-align:center;width:100%;transition:all 0.3s}.record.selected,.calculation.selected{cursor:inherit;box-shadow:rgba(0,0,0,0.3) 2px 2px 2px}.record.selected .rec-label,.calculation.selected .rec-label{padding:0 0 10px 0;width:0}.illustrated .record.selected .rec-label:after,.illustrated .calculation.selected .rec-label:after{color:var(--chunky-text);content:" ×";font-weight:bold;cursor:pointer}.record .record-data{font-family:Menlo,Monaco,Consolas,"Courier New",monospace;display:none;position:relative}.record.selected .record-data{display:block}.record:hover,.calculation:hover{border:2px solid #666}.record.selected:hover,.calculation.selected:hover{border:2px solid transparent}.rec-explanation{display:none;margin-bottom:1em}.selected .rec-explanation{display:block}.record .illustration,.calculation .illustration{margin:-40px 0 0 0;display:none;float:right}.record.selected .illustration,.calculation.selected .illustration{display:block}.record>button.annotate-toggle{display:none}.record.selected>button.annotate-toggle{display:block}.client .record-data .string .bytes:hover{background-color:var(--client-bg-hover)}.server .record-data .string .bytes:hover{background-color:var(--server-bg-hover)}.record.annotate .record-data .string:hover{color:inherit}.record-data .string{position:relative}.record-data .string .label{display:none;position:absolute;background-color:#FAF7DC;border-radius:5px;margin:2px 0;padding:2px 7px;line-height:1.2;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;top:-28px;box-shadow:rgba(0,0,0,0.3) 2px 2px 2px}.record-data .string:hover>.label{display:inline}.record-data .string .label:after{content:"";position:absolute;box-shadow:rgba(0,0,0,0.3) 2px 2px 2px;transform:rotate(45deg);bottom:-3px;left:10px;border-width:3px;border-style:solid;border-color:transparent #FAF7DC #FAF7DC transparent}.record.annotate .string>.explanation,.record.annotate .decryption>.explanation{position:relative;display:block;font-size:0.9em;color:black;margin:1em 0;padding:1em;background-color:#FAF7DC;border:2px solid #e0d998;border-radius:1em;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:rgba(0,0,0,0.3) 2px 2px 2px}.record.annotate .string>.explanation:before{content:" ";position:absolute;padding:5px;transform:rotate(45deg);top:-7px;left:20px;border:2px solid;background-color:#FAF7DC;border-color:#e0d998 transparent transparent #e0d998}.record.annotate .string>.label{display:none}.record .string>.explanation,.record .decryption>.explanation{display:none}.record .decryption>.label:before{content:"⬇ ";font-weight:bold;color:var(--chunky-text)}.record .decryption>.label:after{content:" ⬇";font-weight:bold;color:var(--chunky-text)}.string .bytes{padding:0.2em 0}.string.encrypted .bytes{text-shadow:1px 1px 0 red}.string.decrypted .bytes{text-shadow:1px 1px 0 green}.record-data .decryption{margin:1em 0}.record-data .decryption .label{text-align:center}processblock{display:block;position:relative;margin:1em;padding-left:1em;overflow:hidden;transition:all 0.3s;cursor:pointer;font-size:0.8em}processblock:before{content:" ";width:100%;height:100%;position:absolute;left:0;top:0;pointer-events:none}processblock pre{margin:0}codesample{display:block;margin:1em 0}codesample pre{margin:0;height:0}codesample button.show-code{display:block;clear:both;box-shadow:inset 0 1px 3px 0 var(--sam-btn-inset);background:linear-gradient(to bottom,var(--sam-btn0) 1%,var(--sam-btn9) 100%);border-radius:5px;border:1px solid var(--sam-btn-border);cursor:pointer;color:white;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;padding:11px 23px;text-decoration:none;text-shadow:0-1px 0 var(--sam-btn-shadow)}codesample button.show-code:hover:hover{background:linear-gradient(to bottom,var(--sam-hov-btn0) 1%,var(--sam-hov-btn9) 100%)}codesample button.show-code:active{position:relative;top:1px}codesample.show button.show-code{display:none}codesample.show pre{height:auto}button.annotate-toggle{margin-bottom:1em;display:inline-block;outline:none;cursor:pointer;text-align:center;text-decoration:none;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:1em;padding:.4em 1.7em .45em;text-shadow:0 1px 1px var(--act-btn-shadow);border-radius:.5em;box-shadow:1px 1px 1px rgba(0,0,0,.3);color:#fff;border:solid 1px var(--act-btn-border);background:linear-gradient(180deg,var(--act-btn0) 1%,var(--act-btn9) 100%)}button.annotate-toggle:hover{text-decoration:none;background:linear-gradient(180deg,var(--act-hov-btn0) 1%,var(--act-hov-btn9) 100%)}button.annotate-toggle:active{position:relative;top:1px}.print-mode{cursor:pointer;position:absolute;padding:5px;bottom:0;right:0}.header{width:100%;margin:0;padding:2px;border-bottom:1px solid grey;background-color:bisque;color:#444;line-height:20px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;text-align:right}.header a,.header a:visited,.header a:hover{text-decoration:none;color:#444}.header a.this-page:before{content:"❧ "}.header a,.header span{margin-right:0.5em}.header a.this-page{font-weight:bold}</style>
+<meta property=og:url content=https://tls13.xargs.org/>
+<meta property=og:type content=website>
+<meta property=og:title content="The Illustrated TLS 1.3 Connection">
+<meta property=og:description content="Every byte of a TLS connection explained and reproduced">
+<meta property=og:image content=https://tls13.xargs.org/images/og.png#b>
+<meta name=twitter:card content=summary_large_image>
+<meta property=twitter:domain content=tls13.xargs.org>
+<meta property=twitter:url content=https://tls13.xargs.org/>
+<meta name=twitter:title content="The Illustrated TLS 1.3 Connection">
+<meta name=twitter:description content="Every byte of a TLS connection explained and reproduced">
+<meta name=twitter:image content=https://tls13.xargs.org/images/og.png#b>
+<meta name=msapplication-TileColor content=#da532c>
+<meta name=msapplication-config content=favicon/browserconfig.xml>
+<meta name=theme-color content=#ffffff>
+<link rel=icon type=image/png sizes=32x32 href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACfFBMVEX////7+/vExMS8vLz39/fDw8MbHR0PERGgoKCUlJQCBAUAAQJZWlr8/PyoqKgHCQkAAgNfYGD9/f3W19ceICCVlZXy8vI8PT0aHB3V1dXr6+suMDBeX2AfICG6urp4eXlOTk/19fXo5+fz8/Pg4OA1Njatra2ZmZkqKyxOT0/X19eLjIxHR0jw8PD+/v7//v78+/tbW1sAAAAAAQF3eHi/wMCRkpIrLCyjo6PS0tKIiYljZGRvcHCsrKzs7OzJycksLi4AAAFmZmf6+vqxsbFBQkMLDQ47PD2bm5shIyMLDA0JCww/QUH09PN3d3gFBwijpKT39veFhYUcHR4zNTVNT087PDwKDA2ZmpqwsbESExR9fn7k4+O2trdMTU0MDQ5HSEhoaWopKyttbm6KiosxMjLu7u44OTnm5uZWV1dzdHT5+fnt7e1LTU0bHB0gISIcHh49Pj+9vb0oKSm1trXx8fFISUmLi4z39vZGR0idnp5UVVWEhYXd3d34+PhTVFQ0NTXf398MDg8FBweKi4tBQkLT09MZGhuOj49QUFF/gID29va2trbe3t4sLS6qqqsJCgulpaW4uLjY2NgmJyjb29uTlJQCBASTk5N0dXVaWltISUqWlpYAAgJKS0z09PQvMDDQ0NATFRWzs7OHiIhhYmJqa2vT1NQxMjMrLC3h4ODi4uEqLCwAAwS+vr42NzgHCAmYmJgEBwcDBQYHCQpHSEmnp6fe3d1oaWkXGRliYmNcXF0DBQUCBQYBAwQICgszNDUxMzQhIyQMDg4DBAVUVFXl5eXq6upwcXESFBXp6elpamo1NzcgIiIjJCV0dHXHx8f7+vrc3NzW1taob8/lAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+YEHRAeOLtfX4wAAAGeSURBVDjLY2CgMmBkYmbBq4CVjZ0DrwJOLm4eXnwK+PgFBIXwKRAW4RLFa4WYuIQkXgVS0jKMeBUwycrhDwd5BUV4kCgpY8qrqKrB2eoamloYCrR1dIGknj6QMDA0MjZBkdQ1NZM3t2AQsrSytrG1Y2Cwd3B0QpJ2dnF14zZyt+P10PD0MvL2sfVl8PMPQMgHBgWHhIaFRzBERkXHxMZ5c8cnJCYlI1wplJJqm8brkZ5hkOmYlc2Qk5uXX1CojuSLouISBobSsnKGikputyoGxuoalVoxJAfU1VdnMzCoNTQyMJg1NbcwKLeixXlbewcDg2JnF5DZ3cOXw9Dbhxae/RMmMjBMSp0M46tNmYqqYNr0GQx1PDNh3OxZs7tRFcyZO28+64KFMG7PomloIbzY23vJ0mWwpLZ8xcpVaApWr1nr1s4MjcR16zdsxIikJZs2b9m6rTbHbnvPjp3cuzDjOW33nr379nseOHjo8NwjR49hSSjHT5wU2CcgwM0tsNPvFAM2kF10+szZvHPi5y9cZMABeHMuXW4s1WOgOgAAJA1rBb5X77UAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjItMDQtMjlUMTY6MzA6NTYrMDA6MDBN2199AAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIyLTA0LTI5VDE2OjMwOjU2KzAwOjAwPIbnwQAAAFd6VFh0UmF3IHByb2ZpbGUgdHlwZSBpcHRjAAB4nOPyDAhxVigoyk/LzEnlUgADIwsuYwsTIxNLkxQDEyBEgDTDZAMjs1Qgy9jUyMTMxBzEB8uASKBKLgDqFxF08kI1lQAAAABJRU5ErkJggg=="><style>.sf-hidden{display:none!important}</style><link rel=canonical href=https://tls13.xargs.org/><meta http-equiv=content-security-policy content="default-src 'none'; font-src 'self' data:; img-src 'self' data:; style-src 'unsafe-inline'; media-src 'self' data:; script-src 'unsafe-inline' data:; object-src 'self' data:; frame-src 'self' data:;"><style>img[src="data:,"],source[src="data:,"]{display:none!important}</style></head>
+<body class=illustrated>
+<div class=header>
+ <a href=https://quic.xargs.org/>QUIC</a>
+ <a href=https://dtls.xargs.org/>DTLS</a>
+ <a class=this-page href=https://tls13.xargs.org/>TLS 1.3</a>
+ <a href=https://tls12.xargs.org/>TLS 1.2</a>
+</div>
+<h1>The Illustrated TLS 1.3 Connection</h1>
+<div class=container>
+ <h3>Every byte explained and reproduced</h3>
+ <div class=outerblock>
+ <p>In this demonstration a client connects to a server,
+ negotiates a TLS 1.3 session, sends "ping", receives "pong",
+ and then terminates the session. Click below to begin
+ exploring.</p>
+ </div>
+<div class=rec-outer>
+<div class="calculation client" data-anchor=client-key-exchange-generation><a class=no-show href=#client-key-exchange-generation></a><a class=no-show href=#client-key-exchange-generation/annotated></a>
+<div class=rec-label>Client Key Exchange Generation</div>
+<img class="illustration sf-hidden" src=data:, width=105 height=250>
+<div class="rec-explanation sf-hidden">
+ 
+ The 
+ is created from the private key as explained on the .
+ The public key calculated is:
+ 
+ The public key calculation can be confirmed at the command line:
+ 
+</div>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record client" data-anchor=client-hello><a class=no-show href=#client-hello></a><a class=no-show href=#client-hello/annotated></a>
+<div class=rec-label>Client Hello</div>
+<img class="illustration sf-hidden" src=data:, width=135 height=250>
+<div class="rec-explanation sf-hidden">
+ The session begins with the client saying "Hello".
+ The client provides information including the following:
+ 
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="calculation server" data-anchor=server-key-exchange-generation><a class=no-show href=#server-key-exchange-generation></a><a class=no-show href=#server-key-exchange-generation/annotated></a>
+<div class=rec-label>Server Key Exchange Generation</div>
+<img class="illustration sf-hidden" src=data:, width=106 height=250>
+<div class="rec-explanation sf-hidden">
+ 
+ The 
+ is created from the private key as explained on the .
+ The public key calculated is:
+ 
+ The public key calculation can be confirmed at the command line:
+ 
+</div>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=server-hello><a class=no-show href=#server-hello></a><a class=no-show href=#server-hello/annotated></a>
+<div class=rec-label>Server Hello</div>
+<img class="illustration sf-hidden" src=data:, width=124 height=250>
+<div class="rec-explanation sf-hidden">
+ The server says "Hello" back. The server provides information including the following:
+ 
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="calculation server" data-anchor=server-handshake-keys-calc><a class=no-show href=#server-handshake-keys-calc></a><a class=no-show href=#server-handshake-keys-calc/annotated></a>
+<div class=rec-label>Server Handshake Keys Calc</div>
+<img class="illustration sf-hidden" src=data:, width=97 height=250>
+<div class="rec-explanation sf-hidden">
+ The server now has the information to calculate the
+ keys used to encrypt the rest of the handshake. It uses the following
+ information in this calculation:
+ 
+ First, the server finds the shared secret, which is the
+ result of the key exchange that allows the client and server
+ to agree on a number. The server multiplies the client's
+ public key by the server's private key using the curve25519()
+ algorithm. The 32-byte result is found to be:
+ 
+ I've provided 
+ to perform this calculation:
+ 
+ We then calculate the SHA384 hash of all handshake messages
+ to this point (ClientHello and ServerHello). The hash does
+ not include the 5-byte "record" headers. This "hello_hash"
+ is :
+ 
+ We then feed the hash and the shared secret into a set of
+ key derivation operations, designed to ensure the integrity
+ of the handshake process and to protect against known and
+ possible attacks:
+ 
+ This has introduced two new cryptographic methods:
+ 
+ I've created 
+ to perform these operations on the command line.
+ 
+ From this we get the following key data:
+ 
+</div>
+</div>
+</div>
+<div class=rec-outer>
+<div class="calculation client" data-anchor=client-handshake-keys-calc><a class=no-show href=#client-handshake-keys-calc></a><a class=no-show href=#client-handshake-keys-calc/annotated></a>
+<div class=rec-label>Client Handshake Keys Calc</div>
+<img class="illustration sf-hidden" src=data:, width=97 height=250>
+<div class="rec-explanation sf-hidden">
+ The client now has the information to calculate the
+ keys that used to encrypt the rest of the handshake. It uses the following
+ information in this calculation:
+ 
+ First, the client finds the shared secret, which is the
+ result of the key exchange that allows the client and server
+ to agree on a number. The client multiplies the server's
+ public key by the client's private key using the curve25519()
+ algorithm. The properties of elliptic curve multiplication will
+ cause this to result in the same number found by the server in its
+ multiplication. The 32-byte result is found to be:
+ 
+ I've provided 
+ to perform this calculation:
+ 
+ Since the shared secret above is the same number calculated by the
+ server in "Server Handshake Keys Calc", the rest of
+ the calculation is identical and the same values are found:
+ 
+</div>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=server-change-cipher-spec><a class=no-show href=#server-change-cipher-spec></a><a class=no-show href=#server-change-cipher-spec/annotated></a>
+<div class=rec-label>Server Change Cipher Spec</div>
+<div class="rec-explanation sf-hidden">
+ This record served a purpose in earlier versions on TLS but is no longer needed.
+ In "middlebox compatibility mode" this record is sent to help disguise the session as
+ a TLS 1.2 session.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record><a class=no-show href=#wrapped-record></a><a class=no-show href=#wrapped-record/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<img class="illustration sf-hidden" src=data:, width=124 height=250>
+<div class="rec-explanation sf-hidden">
+ The connection (including the handshake) is encrypted from
+ this point on. The encryption of handshake data is new in
+ TLS 1.3.
+ 
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, the encrypted handshake records are disguised as a
+ TLS 1.2 session that has performed a successful session
+ resume.
+ 
+ This wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-encrypted-extensions><a class=no-show href=#server-encrypted-extensions></a><a class=no-show href=#server-encrypted-extensions/annotated></a>
+<div class=rec-label>Server Encrypted Extensions</div>
+<div class="rec-explanation sf-hidden">
+ Any extensions that aren't needed for negotiating encryption
+ keys should be listed here so that they can be hidden from
+ eavesdroppers and middleboxes.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-2><a class=no-show href=#wrapped-record-2></a><a class=no-show href=#wrapped-record-2/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<img class="illustration sf-hidden" src=data:, width=124 height=250>
+<div class="rec-explanation sf-hidden">
+ The encryption of handshake data is new in TLS 1.3.
+ 
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, the encrypted handshake records are disguised as a
+ TLS 1.2 session that has performed a successful session
+ resume.
+ 
+ This wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-certificate><a class=no-show href=#server-certificate></a><a class=no-show href=#server-certificate/annotated></a>
+<div class=rec-label>Server Certificate</div>
+<img class="illustration sf-hidden" src=data:, width=130 height=250>
+<div class="rec-explanation sf-hidden">
+ The server sends one or more certificates:
+ 
+ In an effort to keep this example small we only send a
+ host certificate. Certificates are in a binary format
+ called DER .
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-3><a class=no-show href=#wrapped-record-3></a><a class=no-show href=#wrapped-record-3/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<img class="illustration sf-hidden" src=data:, width=124 height=250>
+<div class="rec-explanation sf-hidden">
+ The encryption of handshake data is new in TLS 1.3.
+ 
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, the encrypted handshake records are disguised as a
+ TLS 1.2 session that has performed a successful session
+ resume.
+ 
+ This wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-certificate-verify><a class=no-show href=#server-certificate-verify></a><a class=no-show href=#server-certificate-verify/annotated></a>
+<div class=rec-label>Server Certificate Verify</div>
+<div class="rec-explanation sf-hidden">
+ The server provides information that ties the public key
+ generated during Server Key Exchange Generation to the
+ ownership of the certificate's private key.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-4><a class=no-show href=#wrapped-record-4></a><a class=no-show href=#wrapped-record-4/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<img class="illustration sf-hidden" src=data:, width=124 height=250>
+<div class="rec-explanation sf-hidden">
+ The encryption of handshake data is new in TLS 1.3.
+ 
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, the encrypted handshake records are disguised as a
+ TLS 1.2 session that has performed a successful session
+ resume.
+ 
+ This wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-handshake-finished><a class=no-show href=#server-handshake-finished></a><a class=no-show href=#server-handshake-finished/annotated></a>
+<div class=rec-label>Server Handshake Finished</div>
+<div class="rec-explanation sf-hidden">
+ To verify that the handshake was successful and not tampered
+ with, the server calculates verification data that client will agree on.
+ The verification data is built from a hash of all handshake
+ messages.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="calculation server" data-anchor=server-application-keys-calc><a class=no-show href=#server-application-keys-calc></a><a class=no-show href=#server-application-keys-calc/annotated></a>
+<div class=rec-label>Server Application Keys Calc</div>
+<img class="illustration sf-hidden" src=data:, width=97 height=250>
+<div class="rec-explanation sf-hidden">
+ The server now has the information to calculate the
+ keys used to encrypt application traffic.
+ It uses the following information in this calculation:
+ 
+ We calculate the SHA384 hash of all handshake messages to
+ this point(Client Hello, Server Hello, [unwrapped] Encrypted Extensions,
+ [unwrapped] Server Certificate, [unwrapped] Server Certificate Verify,
+ [unwrapped] Server Finished). The hash input does not include the 5-byte
+ "record" headers of ClientHello and ServerHello. It also
+ doesn't include the trailing 1-byte "record type" of unwrapped records.
+ This "handshake_hash" is :
+ 
+ We then feed the hash and the handshake secret into a set of
+ key derivation operations, designed to ensure the integrity
+ of the handshake process and to protect against known and
+ possible attacks:
+ 
+ I've created 
+ to perform these operations on the command line.
+ 
+ From this we get the following key data:
+ 
+</div>
+</div>
+<div class=rec-outer>
+<div class="calculation client" data-anchor=client-application-keys-calc><a class=no-show href=#client-application-keys-calc></a><a class=no-show href=#client-application-keys-calc/annotated></a>
+<div class=rec-label>Client Application Keys Calc</div>
+<div class="rec-explanation sf-hidden">
+ The client now has the information to calculate the
+ keys used to encrypt application traffic.
+ It performs the same calculation shown in "Server Application
+ Keys Calc" and finds the same values:
+ 
+</div>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record client" data-anchor=client-change-cipher-spec><a class=no-show href=#client-change-cipher-spec></a><a class=no-show href=#client-change-cipher-spec/annotated></a>
+<div class=rec-label>Client Change Cipher Spec</div>
+<div class="rec-explanation sf-hidden">
+ This record served a purpose in earlier versions on TLS but is no longer needed.
+ In "middlebox compatibility mode" this record is sent to help disguise the session as
+ a TLS 1.2 session.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record client" data-anchor=wrapped-record-5><a class=no-show href=#wrapped-record-5></a><a class=no-show href=#wrapped-record-5/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<div class="rec-explanation sf-hidden">
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+ application data records.
+ 
+ The wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record client embedded" data-anchor=client-handshake-finished><a class=no-show href=#client-handshake-finished></a><a class=no-show href=#client-handshake-finished/annotated></a>
+<div class=rec-label>Client Handshake Finished</div>
+<div class="rec-explanation sf-hidden">
+ To verify that the handshake was successful and not tampered
+ with, the client calculates verification data that the
+ server will agree on, and encrypts it with the client
+ handshake key. The verification data is built from a hash
+ of all handshake messages.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record client" data-anchor=wrapped-record-6><a class=no-show href=#wrapped-record-6></a><a class=no-show href=#wrapped-record-6/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<div class="rec-explanation sf-hidden">
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+ application data records.
+ 
+ The wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record client embedded" data-anchor=client-application-data><a class=no-show href=#client-application-data></a><a class=no-show href=#client-application-data/annotated></a>
+<div class=rec-label>Client Application Data</div>
+<div class="rec-explanation sf-hidden">
+ The client sends the data "ping".
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-7><a class=no-show href=#wrapped-record-7></a><a class=no-show href=#wrapped-record-7/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<div class="rec-explanation sf-hidden">
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+ application data records.
+ 
+ The wrapped records are discussed in their own sections below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-new-session-ticket-1><a class=no-show href=#server-new-session-ticket-1></a><a class=no-show href=#server-new-session-ticket-1/annotated></a>
+<div class=rec-label>Server New Session Ticket 1</div>
+<div class="rec-explanation sf-hidden">
+ The server provides a session ticket that the client can
+ use to start a new session later. Successfully resuming a
+ connection in this way will skip most of the computation
+ and network delay in session startup.
+ 
+ Because each session ticket is meant to be single-use, and
+ because the server expects a browser to open multiple
+ connections, it makes a size vs. speed decision to provide
+ the client with two session tickets for each negotiated
+ session. This is the first ticket.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-8><a class=no-show href=#wrapped-record-8></a><a class=no-show href=#wrapped-record-8/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<div class="rec-explanation sf-hidden">
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+ application data records.
+ 
+ The wrapped records are discussed in their own sections below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-new-session-ticket-2><a class=no-show href=#server-new-session-ticket-2></a><a class=no-show href=#server-new-session-ticket-2/annotated></a>
+<div class=rec-label>Server New Session Ticket 2</div>
+<div class="rec-explanation sf-hidden">
+ The server provides a session ticket that the client can
+ use to start a new session later. Successfully resuming a
+ connection in this way will skip most of the computation
+ and network delay in session startup.
+ 
+ Because each session ticket is meant to be single-use, and
+ because the server expects a browser to open multiple
+ connections, it makes a size vs. speed decision to provide
+ the client with two session tickets for each negotiated
+ session. This is the second ticket.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class="record server" data-anchor=wrapped-record-9><a class=no-show href=#wrapped-record-9></a><a class=no-show href=#wrapped-record-9/annotated></a>
+<div class=rec-label>Wrapped Record</div>
+<div class="rec-explanation sf-hidden">
+ To reduce issues with middleboxes that block unrecognized
+ TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+ application data records.
+ 
+ The wrapped record is discussed in its own section below this one.
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+ 
+ 
+ 
+ 
+ 
+</span>
+</div>
+</div>
+<div class=rec-outer>
+<div class=embed-arrow>➥</div><div class="record server embedded" data-anchor=server-application-data><a class=no-show href=#server-application-data></a><a class=no-show href=#server-application-data/annotated></a>
+<div class=rec-label>Server Application Data</div>
+<div class="rec-explanation sf-hidden">
+ The server replies with the data "pong".
+</div><button id=annotateTmpl class="annotate-toggle sf-hidden">Annotations</button>
+<span class="record-data sf-hidden">
+ 
+</span>
+</div>
+</div>
+ <div class=outerblock>
+ <p><em>Note: Updated April 2022 to move from an experimental
+ library to OpenSSL 3.0.1. The original version of this page is
+ archived <a href=https://tls13.xargs.org/archive/>here</a>.</em>
+ </p></div>
+ <div class=outerblock>
+ <p>The code for this project, including packet captures, can be found
+ <a href=https://github.com/syncsynchalt/illustrated-tls13>on GitHub</a>.</p>
+ </div>
+ <div class=outerblock>
+ <p>If you found this page useful or interesting let me know via Twitter
+ <a href=https://twitter.com/xargsnotbombs>@XargsNotBombs</a>.</p>
+ </div>
+</div>
+<div id=templates style=display:none>
+ 
+ 
+ 
+</div>
+<a class=print-mode href=#print>
+ [print]
+</a>
+</div>
